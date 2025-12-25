@@ -3,14 +3,24 @@ const ctx = canvas.getContext("2d", { alpha: false });
 
 const TOOL_BTNS = [...document.querySelectorAll("[data-tool]")];
 const brush = document.getElementById("brush");
-const brushVal = document.getElementById("brushVal");
+const brushDisplays = [...document.querySelectorAll(".brushVal")];
 const speed = document.getElementById("speed");
-const speedVal = document.getElementById("speedVal");
+const speedDisplays = [...document.querySelectorAll(".speedVal")];
 const pauseBtn = document.getElementById("pause");
 const resetBtn = document.getElementById("reset");
 
-brush.addEventListener("input", () => (brushVal.textContent = brush.value));
-speed.addEventListener("input", () => (speedVal.textContent = speed.value));
+function updateBrushDisplay(value) {
+  brushDisplays.forEach((el) => (el.textContent = value));
+}
+function updateSpeedDisplay(value) {
+  speedDisplays.forEach((el) => (el.textContent = value));
+}
+
+updateBrushDisplay(brush.value);
+updateSpeedDisplay(speed.value);
+
+brush.addEventListener("input", () => updateBrushDisplay(brush.value));
+speed.addEventListener("input", () => updateSpeedDisplay(speed.value));
 
 let tool = "land";
 TOOL_BTNS.forEach((b) => {
@@ -39,8 +49,8 @@ const COLORS = {
   [TILE.ASH]: [70, 70, 75]
 };
 
-let W = 220;
-let H = 140;
+let W = 240;
+let H = 150;
 let grid = new Uint8Array(W * H);
 let next = new Uint8Array(W * H);
 
@@ -48,17 +58,19 @@ function idx(x, y) { return y * W + x; }
 function inb(x, y) { return x >= 0 && y >= 0 && x < W && y < H; }
 
 function resize() {
-  const top = 58;
-  const ww = window.innerWidth;
-  const hh = window.innerHeight - top;
+  const padding = 40;
+  const ww = window.innerWidth - padding * 2;
+  const hh = window.innerHeight - padding * 2;
 
-  // Keep pixels chunky
-  const scale = Math.max(2, Math.floor(Math.min(ww / W, hh / H)));
-  canvas.width = W * scale;
-  canvas.height = H * scale;
-  canvas.style.width = `${W * scale}px`;
-  canvas.style.height = `${H * scale}px`;
+  // Keep pixels chunky and stretch to fill as much of the viewport as possible.
+  const scale = Math.max(3, Math.floor(Math.min(ww / W, hh / H)));
+  const scaledW = W * scale;
+  const scaledH = H * scale;
 
+  canvas.width = scaledW;
+  canvas.height = scaledH;
+  canvas.style.width = `${scaledW}px`;
+  canvas.style.height = `${scaledH}px`;
   ctx.imageSmoothingEnabled = false;
 }
 window.addEventListener("resize", resize);
